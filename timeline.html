@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Test</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="timeline-container"></div>
+    
+    <!-- Load scripts in correct order -->
+    <script src="js/motionpath.js"></script>
+    <script src="js/keyframe.js"></script>
+    <script src="js/baseframe.js"></script>
+    <script src="js/timeline.js"></script>
+    <script>
+        // Initialize timeline when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.timeline-container');
+            const timeline = new Timeline(1, container);
+                            
+            timeline.addKeyframe(477, 87);
+            
+        });
+    </script>
+</body>
+
+</html>

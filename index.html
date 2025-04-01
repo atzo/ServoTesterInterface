@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servo Tester</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/main.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Connection Section -->
+        <div class="connection-bar">
+            <button id="usbConnect" class="connect-btn" disabled>
+                <span class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L15 8H9L12 2ZM12 22C13.1 22 14 21.1 14 20V14H10V20C10 21.1 10.9 22 12 22ZM4 10V14H8V10H4ZM16 10V14H20V10H16Z" fill="currentColor"/>
+                    </svg>
+                </span> USB Connection
+            </button>
+            <button id="bluetoothConnect" class="connect-btn">
+                <span class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17 7L12 12L17 17V7ZM12 3V9L7 12L12 15V21L5 14L12 3Z" fill="currentColor"/>
+                    </svg>
+                </span> Bluetooth Connection
+            </button>
+        </div>
+        
+        <!-- Status Section -->
+        <div class="status-section">
+            <div class="section-header">
+                <h2>Status Information</h2>
+                <div class="header-controls">
+                    <div class="servo-count-control">
+                        <label for="servoCount">Number of Servos:</label>
+                        <input type="number" id="servoCount" min="1" max="16" value="3">
+                    </div>
+                    <div class="file-controls">
+                        <button id="saveConfig" class="file-btn">
+                            <span class="icon">💾</span> Save
+                        </button>
+                        <button id="loadConfig" class="file-btn">
+                            <span class="icon">📂</span> Load
+                        </button>
+                        <button id="newProject" class="file-btn">
+                            <span class="icon">📄</span> New Project
+                        </button>
+                        <input type="file" id="fileInput" accept=".json" style="display: none;">
+                    </div>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Servo #</th>
+                            <th>Servo Name</th>
+                            <th>Show in Control</th>
+                            <th>Type</th>
+                            <th>Position (°)</th>
+                            <th>Limit min</th>
+                            <th>Limit max</th>
+                            <th>Visual</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Control Section -->
+        <div id="control-section">
+            <h2>Control Panel</h2>            
+        </div>
+    </div>
+</body>
+</html>

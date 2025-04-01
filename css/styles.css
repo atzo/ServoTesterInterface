@@ -1,0 +1,372 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 95%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.connection-bar, .status-section, .control-section {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.connection-bar {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.connect-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.connect-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.connect-btn:not(:disabled) {
+    background: #007bff;
+    color: white;
+}
+
+.connect-btn:hover:not(:disabled) {
+    background: #0056b3;
+}
+
+.status {
+    font-size: 16px;
+    align-self: center;
+}
+
+.status-section table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    min-width: 800px; /* Minimum width before scrolling starts */
+}
+
+/* Add new styles for table wrapper */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 10px;
+}
+
+/* Remove margin-top from table since it's now on the wrapper */
+.status-section table {
+    margin-top: 0;
+}
+
+.status-section th, .status-section td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.status-section th {
+    background-color: #007bff;
+    color: white;
+}
+
+.status-section tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.status-section tbody tr:hover {
+    background-color: #ddd;
+}
+
+.status-section td:first-child {
+    text-align: right;
+    font-weight: bold;
+}
+
+.control-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.servo-control {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.servo-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-width: 100px;
+}
+
+.servo-info p {
+    margin: 0;
+    font-weight: bold;
+}
+
+.servo-info input[type="text"] {
+    width: 80px;
+    text-align: center;
+}
+
+.loop-control {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.loop-control input[type="checkbox"] {
+    margin: 0;
+}
+
+.loop-control span {
+    font-size: 14px;
+    color: #666;
+}
+
+.servo-info input[type="checkbox"] {
+    transform: scale(1.2);
+}
+
+svg:focus {
+    outline: 2px solid rgb(190, 190, 190); /* Custom gray border */
+    outline-offset: 2px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.add-btn {
+    padding: 8px 16px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-btn:hover {
+    background-color: #218838;
+}
+
+.remove-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 8px;
+    line-height: 1;
+}
+
+.remove-btn:hover {
+    color: #c82333;
+}
+
+/* Add a column for the remove button */
+.status-section th:last-child,
+.status-section td:last-child {
+    width: 40px;
+    text-align: center;
+}
+
+.servo-count-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.servo-count-control label {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.servo-count-control input[type="number"] {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.servo-count-control input[type="number"]::-webkit-inner-spin-button,
+.servo-count-control input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+    height: 24px;
+    cursor: pointer;
+    width: 20px;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.file-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.file-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f8f8f8;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.file-btn:hover {
+    background: #e8e8e8;
+}
+
+.file-btn .icon {
+    font-size: 16px;
+}
+
+.timeline-container {
+    width: 100%;
+    height: 200px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.timeline-container svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.servo-control {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.servo-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.servo-info p {
+    margin: 0;
+    min-width: 100px;
+}
+
+.servo-info input[type="text"] {
+    flex: 1;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.servo-info input[type="checkbox"] {
+    margin-left: 10px;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.control-buttons button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.control-buttons button:hover {
+    background-color: #45a049;
+}
+
+.control-buttons input[type="number"] {
+    width: 60px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.servo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.servo-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.loop-toggle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.loop-toggle input[type="checkbox"] {
+    margin: 0;
+}
+
+.loop-toggle span {
+    font-size: 14px;
+    color: #666;
+}
