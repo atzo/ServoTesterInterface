@@ -89,8 +89,9 @@ class ServoManager {
             }
         });
 
+        // Handle type toggle changes
         document.addEventListener('change', (e) => {
-            if (e.target.matches('.servo-control input[type="checkbox"]')) {
+            if (e.target.matches('.toggle-switch input')) {
                 const servoId = parseInt(e.target.dataset.id);
                 const servo = this.servos.find(s => s.id === servoId);
                 if (servo) {
@@ -100,8 +101,33 @@ class ServoManager {
             }
         });
 
+        // Handle loop checkbox changes
+        document.addEventListener('change', (e) => {
+            if (e.target.matches('.loop-control input')) {
+                const servoId = parseInt(e.target.dataset.id);
+                const servo = this.servos.find(s => s.id === servoId);
+                if (servo) {
+                    servo.loop = e.target.checked;
+                    this.saveToStorage();
+                }
+            }
+        });
+
         // Auto-save on any change
         this.setupAutoSave();
+
+        // Initialize timeline duration input
+        const durationInput = document.getElementById('timelineDuration');
+        durationInput.addEventListener('change', (e) => {
+            const newDuration = parseFloat(e.target.value);
+            if (newDuration >= 1 && newDuration <= 60) {
+                this.servos.forEach(servo => {
+                    if (servo.timeline) {
+                        servo.timeline.setDuration(newDuration);
+                    }
+                });
+            }
+        });
     }
 
     setupAutoSave() {
@@ -132,6 +158,10 @@ class ServoManager {
     }
 
     collectData() {
+        // Get the current duration from the input
+        const durationInput = document.getElementById('timelineDuration');
+        const duration = durationInput ? parseFloat(durationInput.value) : 5;
+
         return {
             servos: this.servos.map(servo => {
                 // Get the timeline instance from the servo object
@@ -179,6 +209,7 @@ class ServoManager {
                     name: servo.name,
                     showInControl: servo.showInControl,
                     type: servo.type,
+                    loop: servo.loop || false,
                     position: servo.position,
                     limitMin: servo.limitMin,
                     limitMax: servo.limitMax,
@@ -188,7 +219,8 @@ class ServoManager {
                     motionPaths
                 };
             }),
-            nextId: this.nextId
+            nextId: this.nextId,
+            duration: duration
         };
     }
 
@@ -202,6 +234,12 @@ class ServoManager {
         // Clear existing servos
         this.servos = [];
         
+        // Set the timeline duration input first
+        const durationInput = document.getElementById('timelineDuration');
+        if (durationInput && data.duration) {
+            durationInput.value = data.duration;
+        }
+        
         // Load servos
         data.servos.forEach(servoData => {
             const servo = {
@@ -209,6 +247,7 @@ class ServoManager {
                 name: servoData.name,
                 showInControl: servoData.showInControl,
                 type: servoData.type,
+                loop: servoData.loop || false,
                 position: servoData.position,
                 limitMin: servoData.limitMin,
                 limitMax: servoData.limitMax,
@@ -230,6 +269,11 @@ class ServoManager {
 
                 // Set baseframe dimensions               
                 timeline.motionPaths.startKeyframe.setPosition(servoData.baseframe.value);
+                
+                // Set the duration if it exists in the data
+                if (data.duration) {
+                    timeline.setDuration(data.duration);
+                }
                 
                 // Load keyframes and motion paths
                 if (servoData.keyframes && servoData.motionPaths) {
@@ -261,11 +305,12 @@ class ServoManager {
         
         // Update nextId
         this.nextId = data.nextId || this.servos.length + 1;
-        //set the servo count input to the number of servos
+        
+        // Set the servo count input to the number of servos
         const servoCountInput = document.getElementById('servoCount');
         if (servoCountInput) {
             servoCountInput.value = this.servos.length;
-        }        
+        }
     }
 
     loadFromStorage() {
@@ -357,6 +402,7 @@ class ServoManager {
             name: `Servo ${this.servos.length + 1}`,
             showInControl: true,
             type: true,
+            loop: false,
             position: 90,
             limitMin: 0,
             limitMax: 180,
@@ -393,12 +439,15 @@ class ServoManager {
             <td>
                 <label class="toggle-switch">
                     <input type="checkbox" ${servo.type ? 'checked' : ''} data-id="${servo.id}">
-                    <span class="slider"></span>
+                    <span class="slider">
+                        <span class="option left">180°</span>
+                        <span class="option right">360°</span>
+                    </span>
                 </label>
             </td>
-            <td>${servo.position}</td>
             <td><input type="text" value="${servo.limitMin}" data-id="${servo.id}"></td>
             <td><input type="text" value="${servo.limitMax}" data-id="${servo.id}"></td>
+            <td>${servo.position}</td>
             <td>${servo.visual}</td>
         `;
 
@@ -461,10 +510,12 @@ class ServoManager {
         const limitInputs = row.querySelectorAll('input[type="text"]');
         limitInputs[1].addEventListener('change', (e) => {
             servo.limitMin = parseInt(e.target.value);
+            servo.timeline.updateLimits(servo.limitMin, servo.limitMax);
             this.saveToStorage();
         });
         limitInputs[2].addEventListener('change', (e) => {
             servo.limitMax = parseInt(e.target.value);
+            servo.timeline.updateLimits(servo.limitMin, servo.limitMax);
             this.saveToStorage();
         });
     }
@@ -498,7 +549,7 @@ class ServoManager {
             <p>Servo ${servo.id}</p>
             <input type="text" value="${servo.name}" data-id="${servo.id}">
             <div class="loop-control">
-                <input type="checkbox" ${servo.type ? 'checked' : ''} data-id="${servo.id}">
+                <input type="checkbox" ${servo.loop ? 'checked' : ''} data-id="${servo.id}">
                 <span>Loop</span>
             </div>
         `;
@@ -509,14 +560,33 @@ class ServoManager {
         timelineContainer.className = 'timeline-container';
         timelineContainer.setAttribute('data-id', servo.id);
         
-        // Create timeline with the correct parameters
-        const timeline = new Timeline(servo.id, timelineContainer);
+        // Get the current duration from the input
+        const durationInput = document.getElementById('timelineDuration');
+        const duration = durationInput ? parseFloat(durationInput.value) : 5;
+        
+        // Create timeline with the servo's limits
+        const timeline = new Timeline(
+            servo.id, 
+            timelineContainer, 
+            1000,  // width 
+            200,   // height
+            duration, // duration
+            servo.limitMin, 
+            servo.limitMax
+        );
         timelineContainer.timeline = timeline;
         servo.timeline = timeline;
         
         // Add event listener for timeline changes
         timeline.addEventListener('change', () => {
             console.log('Timeline changed, saving to storage');
+            this.saveToStorage();
+        });
+        
+        // Add event listener for loop checkbox
+        const loopCheckbox = servoInfo.querySelector('.loop-control input');
+        loopCheckbox.addEventListener('change', (e) => {
+            servo.loop = e.target.checked;
             this.saveToStorage();
         });
         

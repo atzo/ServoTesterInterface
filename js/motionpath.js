@@ -53,7 +53,8 @@ class MotionPath {
         this.path.setAttribute("fill", "none");
         this.path.setAttribute("stroke-width", "2");
         this.path.style.cursor = "pointer"; // Add pointer cursor
-        this.svg.appendChild(this.path);
+        // Insert path at the beginning of SVG to ensure it stays behind other elements
+        this.svg.insertBefore(this.path, this.svg.firstChild);
 
         // Add click event listener for path selection
         this.path.addEventListener("click", (event) => this.checkSelection(event));
@@ -84,13 +85,13 @@ class MotionPath {
         this.controlLine1.setAttribute("stroke", "gray");
         this.controlLine1.setAttribute("stroke-width", "1");
         this.controlLine1.setAttribute("visibility", "hidden");
-        this.svg.appendChild(this.controlLine1);
+        this.svg.insertBefore(this.controlLine1, this.svg.firstChild);
 
         this.controlLine2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
         this.controlLine2.setAttribute("stroke", "gray");
         this.controlLine2.setAttribute("stroke-width", "1");
         this.controlLine2.setAttribute("visibility", "hidden");
-        this.svg.appendChild(this.controlLine2);
+        this.svg.insertBefore(this.controlLine2, this.svg.firstChild);
     }
 
     attachEventListeners() {

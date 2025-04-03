@@ -8,7 +8,7 @@ class Timeline {
     static TIMELINE_POSITION_MAX = 100;  // Maximum position value (0-100)
     static TIMELINE_VALUE_MAX = 180;     // Maximum value/angle (0-180)
 
-    constructor(id, timeLineContainer, width = 1000, height = 200, timeInterval = 1, minAngle = 0, maxAngle = 180) {
+    constructor(id, timeLineContainer, width = 1000, height = 200, duration = 5, minAngle = 0, maxAngle = 180) {
         if (!timeLineContainer) {
             throw new Error('Timeline container is required');
         }
@@ -17,7 +17,7 @@ class Timeline {
         this.id = id;
         this.width = width;
         this.height = height;
-        this.timeInterval = timeInterval;
+        this.duration = duration;
         this.minAngle = minAngle;
         this.maxAngle = maxAngle;
         this.selectedKeyframe = null;
@@ -89,6 +89,15 @@ class Timeline {
     }
 
     drawXAxisLabels(axisGroup) {
+        // Remove existing time labels
+        const existingLabels = axisGroup.querySelectorAll('text');
+        existingLabels.forEach(label => {
+            if (label.getAttribute('class') === 'time-label') {
+                label.remove();
+            }
+        });
+
+        // Add new time labels based on duration
         for (let i = 0; i <= 10; i++) {
             let xPos = 50 + (i * (this.width - 70) / 10);           
             let label = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -97,8 +106,9 @@ class Timeline {
             label.setAttribute("font-size", "12");
             label.setAttribute("text-anchor", "middle");
             label.setAttribute("pointer-events", "none");
+            label.setAttribute("class", "time-label");
             label.style.userSelect = "none";
-            label.textContent = i * this.timeInterval;
+            label.textContent = (i * this.duration / 10).toFixed(1);
             axisGroup.appendChild(label);
         }
     }
@@ -121,9 +131,17 @@ class Timeline {
     }
 
     drawLimits() {
+        // Remove existing limits if any
+        const existingLimits = this.svg.querySelector('.limits');
+        if (existingLimits) {
+            existingLimits.remove();
+        }
+
         const limitGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
         limitGroup.setAttribute("class", "limits");
-        this.svg.appendChild(limitGroup);
+        
+        // Insert limits at the beginning of SVG to ensure they're behind everything
+        this.svg.insertBefore(limitGroup, this.svg.firstChild);
 
         // Calculate limit positions
         const upperLimitY = Math.max(30, this.height - 30 - ((this.maxAngle / 180) * (this.height - 50)));
@@ -148,6 +166,12 @@ class Timeline {
         lowerLimitRect.setAttribute("fill", "rgba(255, 0, 0, 0.1)");
         lowerLimitRect.setAttribute("pointer-events", "none");
         limitGroup.appendChild(lowerLimitRect);
+    }
+
+    updateLimits(minAngle, maxAngle) {
+        this.minAngle = minAngle;
+        this.maxAngle = maxAngle;
+        this.drawLimits();
     }
 
     attachEventListeners() {
@@ -470,5 +494,20 @@ class Timeline {
 
         // Update all paths
         this.updatePaths();
+    }
+
+    setDuration(duration) {
+        this.duration = duration;
+        const axisGroup = this.svg.querySelector('.axes');
+        if (axisGroup) {
+            this.drawXAxisLabels(axisGroup);
+        }
+    }
+
+    updateTimeLabels() {
+        const axisGroup = this.svg.querySelector('.axes');
+        if (axisGroup) {
+            this.drawXAxisLabels(axisGroup);
+        }
     }
 }

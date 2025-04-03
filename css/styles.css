@@ -30,14 +30,14 @@ body {
 }
 
 .connect-btn {
-    padding: 10px 20px;
+    padding: 8px 15px;
     font-size: 16px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .connect-btn:disabled {
@@ -54,6 +54,17 @@ body {
     background: #0056b3;
 }
 
+.connect-btn .icon {
+    display: flex;
+    align-items: center;
+    margin-top: 1px;
+}
+
+.connect-btn .icon svg {
+    width: 24px;
+    height: 24px;
+}
+
 .status {
     font-size: 16px;
     align-self: center;
@@ -64,6 +75,7 @@ body {
     border-collapse: collapse;
     margin-top: 10px;
     min-width: 800px; /* Minimum width before scrolling starts */
+    table-layout: fixed;
 }
 
 /* Add new styles for table wrapper */
@@ -370,3 +382,122 @@ svg:focus {
     font-size: 14px;
     color: #666;
 }
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 85px;
+    height: 26px;
+}
+
+.toggle-switch input {
+    display: none;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    background-color: #fff;
+    border: 1px solid #666;
+    border-radius: 4px;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    font-weight: normal;
+    font-family: sans-serif;
+    font-size: 12px;
+    color: #666;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.option {
+    z-index: 2;
+    pointer-events: none;
+    transition: color 0.3s ease;
+}
+
+.slider::before {
+    content: "";
+    position: absolute;
+    height: 20px;
+    width: 40px;
+    left: 3px;
+    top: 2px;
+    background-color: #007bff;
+    border-radius: 3px;
+    transition: transform 0.3s ease;
+    z-index: 1;
+}
+
+.toggle-switch input:checked + .slider::before {
+    transform: translateX(37px);
+}
+
+/* Active label on top of thumb turns white */
+.toggle-switch input:not(:checked) + .slider .left {
+    color: white;
+}
+.toggle-switch input:checked + .slider .right {
+    color: white;
+}
+
+/* Inactive label stays gray */
+.toggle-switch input:not(:checked) + .slider .right {
+    color: #aaa;
+}
+.toggle-switch input:checked + .slider .left {
+    color: #aaa;
+}
+/* Status table column widths */
+.status-section table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.status-section th:nth-child(1), /* Servo # */
+.status-section td:nth-child(1) {
+    width: 60px;
+}
+
+.status-section th:nth-child(2), /* Servo Name */
+.status-section td:nth-child(2) {
+    width: auto;
+}
+
+/* Last 6 columns - equal width */
+.status-section th:nth-child(3), /* Show in Control */
+.status-section td:nth-child(3),
+.status-section th:nth-child(5), /* Limit min */
+.status-section td:nth-child(5),
+.status-section th:nth-child(6), /* Limit max */
+.status-section td:nth-child(6),
+.status-section th:nth-child(7), /* Position */
+.status-section td:nth-child(7),
+.status-section th:nth-child(8), /* Visual */
+.status-section td:nth-child(8) {
+    width: 80px;
+}
+
+/* Type column - wider */
+.status-section th:nth-child(4),
+.status-section td:nth-child(4) {
+    width: 100px;
+}
+
+/* Ensure inputs fit their columns */
+.status-section input[type="text"] {
+    width: 45px;
+    text-align: center;
+}
+
+.status-section input[type="text"][data-id] {
+    width: calc(100% - 20px);
+    margin: 0 10px;
+    text-align: left;
+    box-sizing: border-box;
+}
+
