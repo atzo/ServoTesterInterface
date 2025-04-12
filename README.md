@@ -2,6 +2,45 @@
 
 A web-based interface for programming and testing servo motors with an intuitive visual timeline. Create smooth servo motion sequences using interactive Bezier curves, manage multiple servos, and save your configurations.
 
+## Application Access
+The application is available at: [https://atzo.github.io/ServoTesterInterface/](https://atzo.github.io/ServoTesterInterface/)
+
+### Browser Compatibility
+- **Google Chrome/Edge (Recommended)**
+  - Full support for all features
+  - Best performance and stability
+  - Complete Web Serial and Web Bluetooth API support
+- **Firefox**
+  - Limited functionality
+  - No Web Serial API support (USB connection not available)
+  - Web Bluetooth API support varies by version
+- **Safari**
+  - Limited functionality
+  - No Web Serial API support
+  - No Web Bluetooth API support
+  - Not recommended for use
+
+Note: The application is fully functional except for the hardware connection features (USB and Bluetooth) which are currently under development. Browser support for these features may improve in future browser versions.
+
+## Development Status
+
+⚠️ **This project is currently in active development** ⚠️
+
+The interface is functional but may undergo significant changes as development continues. New features and improvements are being added regularly.
+
+### Missing Components
+The following interface components are currently under development:
+- USB and Bluetooth connection implementation
+- Timeline scrubber for animation preview and control
+
+## Hardware Integration
+
+This project is part of a larger system that includes a microcontroller-based hardware component for servo control. The hardware component:
+- Supports multiple servo control protocols
+- Can handle multiple servos simultaneously
+- Provides real-time servo position control
+- Manages hardware-level servo operations
+
 ## Key Features
 - Visual timeline editor with Bezier curve interpolation
 - Support for up to 16 servos with individual controls
