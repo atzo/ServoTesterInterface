@@ -146,16 +146,23 @@ After starting a local server, access the application at `http://localhost:8000`
 ```
 ServoTesterInterface/
 ├── css/
-│   └── styles.css
+│   └── styles.css          # Main stylesheet
 ├── js/
-│   ├── baseframe.js    # Base frame functionality
-│   ├── keyframe.js     # Keyframe management
-│   ├── main.js         # Main application entry
-│   ├── motionpath.js   # Motion path and Bezier curves
-│   ├── servoManager.js # Servo control and management
-│   └── timeline.js     # Timeline visualization
-├── index.html          # Main application
-└── timeline.html       # Timeline testing page
+│   ├── baseframe.js        # Base frame functionality
+│   ├── constants.js        # Global constants
+│   ├── keyframe.js         # Keyframe management
+│   ├── main.js             # Main application entry
+│   ├── motionpath.js       # Motion path and Bezier curves
+│   ├── script.js           # Additional scripts
+│   ├── servoManager.js     # Servo control and management
+│   ├── timeline.js         # Timeline visualization
+│   ├── timelineScrubber.js # Animation playback control
+│   └── webserial.js        # USB serial communication
+├── .gitignore              # Git ignore rules
+├── index.html              # Main application
+├── LICENSE                 # License information
+├── README.md               # Project documentation
+└── timeline.html           # Timeline testing page
 ```
 
 ## Usage
