@@ -7,10 +7,22 @@ class Baseframe {
         this.selectedState = false;
         
         // Define x-coordinates for both positions
-        this.xStart = 50;
-        this.xEnd = this.timelineWidth - 20;
+        this.xStart = SVG_PADDING_LEFT;
+        this.xEnd = this.timelineWidth - SVG_PADDING_RIGHT;
         
         this.createKeyframeElements();
+    }
+
+    getStartX() {
+        // Recalculate x-coordinate to 1-100 range
+        const availableWidth = this.timelineWidth - (SVG_PADDING_LEFT + SVG_PADDING_RIGHT);
+        return  ((this.xStart - SVG_PADDING_LEFT) / availableWidth) * 100;
+    }
+
+    getEndX() {
+        // Recalculate x-coordinate to 1-100 range
+        const availableWidth = this.timelineWidth - (SVG_PADDING_LEFT + SVG_PADDING_RIGHT);
+        return  ((this.xEnd - SVG_PADDING_LEFT) / availableWidth) * 100;
     }
 
     createKeyframeElements() {

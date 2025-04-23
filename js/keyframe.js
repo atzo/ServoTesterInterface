@@ -10,13 +10,25 @@ class Keyframe {
         this.createKeyframeElement();
     }
 
+    getStartX() {
+        // Recalculate x-coordinate to 1-100 range
+        const availableWidth = this.timelineWidth - (SVG_PADDING_LEFT + SVG_PADDING_RIGHT);
+        return 1 + ((this.x - SVG_PADDING_LEFT) / availableWidth) * 99;
+    }
+
+    getEndX() {
+        // Recalculate x-coordinate to 1-100 range
+        const availableWidth = this.timelineWidth - (SVG_PADDING_LEFT + SVG_PADDING_RIGHT);
+        return 1 + ((this.x - SVG_PADDING_LEFT) / availableWidth) * 99;
+    }   
+
     createKeyframeElement() {        
         // Create the vertical line
         this.line = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         this.line.setAttribute("x", this.x-1);
-        this.line.setAttribute("y", 20);
+        this.line.setAttribute("y", SVG_PADDING_TOP);
         this.line.setAttribute("width", 2);
-        this.line.setAttribute("height", this.timelineHeight-50);
+        this.line.setAttribute("height", this.timelineHeight - (SVG_PADDING_TOP + SVG_PADDING_BOTTOM));
         this.line.setAttribute("fill", "blue");        
         this.line.setAttribute("stroke", "transparent");
         this.line.setAttribute("stroke-width", "10");
@@ -42,7 +54,7 @@ class Keyframe {
     }
 
     startDragging(event, isDot) {
-        console.log("Start dragging"); 
+        //console.log("Start dragging"); 
         event.stopPropagation();
         this.dragging = true;
         this.draggingDot = isDot;
@@ -55,7 +67,7 @@ class Keyframe {
     }
 
     selectKeyframe(event) {
-        console.log("Select keyframe");
+        //console.log("Select keyframe");
         event.stopPropagation();
         event.preventDefault();
         
@@ -106,7 +118,7 @@ class Keyframe {
     }
 
     setPosition(newX, newY) {
-        console.log("Set position" + newX + " " + newY);
+        //console.log("Set position" + newX + " " + newY);
         this.x = newX;
         this.y = newY;
         this.line.setAttribute("x", this.x-1);       

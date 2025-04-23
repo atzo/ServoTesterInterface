@@ -501,3 +501,156 @@ svg:focus {
     box-sizing: border-box;
 }
 
+/* Timeline Scrubber */
+.timeline-scrubber {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: inherit;
+    max-width: inherit;
+    height: 40px;
+    background-color: rgba(245, 245, 245, 0.8);
+    border-top: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 20px;
+    transition: background-color 0.3s ease;
+    z-index: 1000;
+}
+
+.timeline-scrubber.active {
+    background-color: #f5f5f5;
+}
+
+#playPauseBtn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: #007bff;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+#playPauseBtn:hover {
+    background: #0056b3;
+}
+
+#timeSlider {
+    flex: 1;
+    height: 8px;
+    -webkit-appearance: none;
+    background: #ddd;
+    border-radius: 4px;
+    outline: none;
+}
+
+#timeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#timeSlider::-webkit-slider-thumb:hover {
+    background: #0056b3;
+}
+
+#timeDisplay {
+    min-width: 60px;
+    text-align: center;
+    font-family: monospace;
+    font-size: 16px;
+    color: #666;
+}
+
+/* Adjust control panel to account for scrubber */
+.control-panel {
+    padding-bottom: 60px;
+}
+
+/* Enable Switch */
+.enable-container {
+    position: relative;
+    display: inline-block;
+    width: 70px;
+    height: 26px;
+}
+
+.enable-switch {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+}
+
+.enable-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.enable-switch .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #fff;
+    border: 1px solid #666;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    font-weight: normal;
+    font-family: sans-serif;
+    font-size: 12px;
+    color: #666;
+}
+
+.enable-switch .slider:before {
+    content: "";
+    position: absolute;
+    height: 20px;
+    width: 32px;
+    left: 2px;
+    top: 2px;
+    background-color: #ccc;
+    border-radius: 3px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    z-index: 1;
+}
+
+.enable-switch input:checked + .slider:before {
+    transform: translateX(32px);
+    background-color: #007bff;
+}
+
+/* Active label on top of thumb turns white */
+.enable-switch input:not(:checked) + .slider .left {
+    color: white;
+}
+.enable-switch input:checked + .slider .right {
+    color: white;
+}
+
+/* Inactive label stays gray */
+.enable-switch input:not(:checked) + .slider .right {
+    color: #aaa;
+}
+.enable-switch input:checked + .slider .left {
+    color: #aaa;
+}
+

@@ -1,10 +1,5 @@
 class Timeline {
     // Constants for coordinate conversion
-    static SVG_PADDING_LEFT = 50;      // Left padding in SVG coordinates
-    static SVG_PADDING_BOTTOM = 30;    // Bottom padding in SVG coordinates
-    static SVG_PADDING_RIGHT = 20;     // Right padding in SVG coordinates
-    static SVG_PADDING_TOP = 30;       // Top padding in SVG coordinates
-    
     static TIMELINE_POSITION_MAX = 100;  // Maximum position value (0-100)
     static TIMELINE_VALUE_MAX = 180;     // Maximum value/angle (0-180)
 
@@ -12,7 +7,7 @@ class Timeline {
         if (!timeLineContainer) {
             throw new Error('Timeline container is required');
         }
-        
+
         this.timeLineContainer = timeLineContainer;
         this.id = id;
         this.width = width;
@@ -22,7 +17,7 @@ class Timeline {
         this.maxAngle = maxAngle;
         this.selectedKeyframe = null;
         this.eventListeners = new Map();
-        
+
         // Initialize the timeline
         this.initialize();
     }
@@ -38,11 +33,14 @@ class Timeline {
         this.initAxes();
         this.drawLimits();
         this.attachEventListeners();
-        
+
         // Create Baseframe and initial MotionPath
         let baseframe = new Baseframe(this);
-        this.motionPaths = new MotionPath(null, baseframe, this);      
-        this.motionPaths.nextMotinPath = this.motionPaths;       
+        this.motionPaths = new MotionPath(null, baseframe, this);
+        this.motionPaths.nextMotinPath = this.motionPaths;
+
+        // Create time indicator
+        this.createTimeIndicator();
     }
 
     createSVGCanvas() {
@@ -83,7 +81,7 @@ class Timeline {
 
         // Add time scale labels
         this.drawXAxisLabels(axisGroup);
-        
+
         // Add angle scale labels
         this.drawYAxisLabels(axisGroup);
     }
@@ -99,7 +97,7 @@ class Timeline {
 
         // Add new time labels based on duration
         for (let i = 0; i <= 10; i++) {
-            let xPos = 50 + (i * (this.width - 70) / 10);           
+            let xPos = 50 + (i * (this.width - 70) / 10);
             let label = document.createElementNS("http://www.w3.org/2000/svg", "text");
             label.setAttribute("x", xPos);
             label.setAttribute("y", this.height - 15);
@@ -117,7 +115,7 @@ class Timeline {
         for (let i = 0; i <= 3; i++) {
             let yPos = this.height - 30 - (i * (this.height - 50) / 3);
             let angle = i * 60; // 0, 60, 120, 180
-            
+
             let label = document.createElementNS("http://www.w3.org/2000/svg", "text");
             label.setAttribute("x", "35");
             label.setAttribute("y", yPos);
@@ -139,7 +137,7 @@ class Timeline {
 
         const limitGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
         limitGroup.setAttribute("class", "limits");
-        
+
         // Insert limits at the beginning of SVG to ensure they're behind everything
         this.svg.insertBefore(limitGroup, this.svg.firstChild);
 
@@ -193,15 +191,15 @@ class Timeline {
         // Handle double click to add keyframes
         this.svg.addEventListener('dblclick', (e) => {
             e.preventDefault();
-            
+
             // Get relative coordinates using SVG's coordinate transformation
             let pt = this.svg.createSVGPoint();
             pt.x = e.clientX;
             pt.y = e.clientY;
-            
+
             // Transform the point from screen coordinates to SVG coordinates
             let svgP = pt.matrixTransform(this.svg.getScreenCTM().inverse());
-            
+
             this.addKeyframe(svgP.x, svgP.y);
         });
 
@@ -219,10 +217,10 @@ class Timeline {
 
     selectKeyframe(keyframe) {
         if (this.selectedKeyframe === keyframe) return; // Prevent reselecting the same keyframe
-        
+
         // Deselect all keyframes first
         this.deselectAllKeyframes();
-        
+
         // Select the clicked keyframe
         keyframe.selected(true);
         this.selectedKeyframe = keyframe;
@@ -230,11 +228,11 @@ class Timeline {
 
     deselectAllKeyframes() {
         let motionPath = this.motionPaths;
-        do {           
+        do {
             motionPath.endKeyframe.selected(false);
             motionPath = motionPath.nextMotinPath;
         } while (motionPath !== this.motionPaths);
-        
+
         this.selectedKeyframe = null;
     }
 
@@ -281,29 +279,29 @@ class Timeline {
     }
 
     findPrevMotionPath(xPos) {
-        let motionPath = this.motionPaths;              
-        
+        let motionPath = this.motionPaths;
+
         do {
             let x1 = motionPath.startKeyframe.x || motionPath.startKeyframe.xStart;
             let x2 = motionPath.nextMotinPath.startKeyframe.x || motionPath.endKeyframe.xEnd;
-           console.log("x1: " + x1 + " x2: " + x2 + " xPos: " + xPos);
+            //  console.log("x1: " + x1 + " x2: " + x2 + " xPos: " + xPos);
             if (x1 < xPos && x2 > xPos) {
                 return motionPath;
-            }            
+            }
             motionPath = motionPath.nextMotinPath;
         } while (motionPath !== this.motionPaths);
-        
+
         throw new Error("Error in function findPrevMotionPath!");
     }
 
     addKeyframe(position, value) {
-        let xPos, yPos;        
+        let xPos, yPos;
 
         // If we received SVG coordinates directly (from double-click)
         if (typeof position === 'number' && typeof value === 'number') {
             xPos = position;
             yPos = value;
-            
+
             // Convert coordinates to timeline values
             const timelineUnits = this.svgToTimelineUnits(xPos, yPos);
             position = timelineUnits.position;
@@ -314,35 +312,35 @@ class Timeline {
             xPos = svgUnits.x;
             yPos = svgUnits.y;
         }
-        
-        console.log("Adding keyframe 1: " + xPos + " yPos " + yPos);
+
+        // console.log("Adding keyframe 1: " + xPos + " yPos " + yPos);
 
         // Check if position is within valid range (50 to width-20)
         if (xPos < 50 || xPos > this.width - 20) return;
 
-        let prevMotionPath = this.findPrevMotionPath(xPos);        
+        let prevMotionPath = this.findPrevMotionPath(xPos);
         let newKeyframe = new Keyframe(xPos, yPos, this.svg, this.width, this.height, this);
         let motionPath = new MotionPath(prevMotionPath, newKeyframe, this);
-        
+
         prevMotionPath.nextMotinPath = motionPath;
         prevMotionPath.endKeyframe = newKeyframe;
-        
+
         prevMotionPath.updatePath();
         this.emit('change', { type: 'add', keyframe: newKeyframe });
     }
 
     deleteSelectedKeyframe() {
-        console.log("Removing selected keyframe!");  
+        // console.log("Removing selected keyframe!");  
         let motionPath = this.motionPaths;
-        while(!(motionPath.endKeyframe instanceof Baseframe) && !motionPath.endKeyframe.selectedState){
-            console.log("Brojimo loop");
-            motionPath = motionPath.nextMotinPath;                  
+        while (!(motionPath.endKeyframe instanceof Baseframe) && !motionPath.endKeyframe.selectedState) {
+            //  console.log("Brojimo loop");
+            motionPath = motionPath.nextMotinPath;
         };
 
-        if ((!(motionPath.nextMotinPath.startKeyframe instanceof Baseframe)) && motionPath.endKeyframe.selectedState){
-            console.log("E tu brišem keyframe!!!");
+        if ((!(motionPath.nextMotinPath.startKeyframe instanceof Baseframe)) && motionPath.endKeyframe.selectedState) {
+            //  console.log("E tu brišem keyframe!!!");
             motionPath.endKeyframe.line.remove();
-            motionPath.endKeyframe.dot.remove();            
+            motionPath.endKeyframe.dot.remove();
             motionPath.endKeyframe = motionPath.nextMotinPath.endKeyframe;
             motionPath.nextMotinPath.path.remove();
             motionPath.nextMotinPath = motionPath.nextMotinPath.nextMotinPath;
@@ -362,44 +360,44 @@ class Timeline {
     resize(newWidth, newHeight) {
         if (newWidth < 200) newWidth = 200;
         if (newHeight < 100) newHeight = 100;
-        
+
         this.width = newWidth;
         this.height = newHeight;
-        
+
         // Update SVG dimensions
         this.svg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
         this.svg.style.width = '100%';
         this.svg.style.height = '100%';
-        
+
         // Clear existing content
         this.svg.innerHTML = '';
-        
+
         // Redraw everything in the correct order
         this.initAxes();
         this.drawLimits();
-        
+
         // Recreate baseframe first
         let baseframe = new Baseframe(this);
         this.motionPaths = new MotionPath(null, baseframe, this);
-        
+
         // Recreate all keyframes and motion paths
         if (this.motionPaths) {
             let motionPath = this.motionPaths;
             let nextMotionPath = motionPath.nextMotinPath;
-            
+
             while (nextMotionPath && !(nextMotionPath.endKeyframe instanceof Baseframe)) {
                 let xPos = nextMotionPath.endKeyframe.x;
                 let yPos = nextMotionPath.endKeyframe.y;
-                
+
                 let newKeyframe = new Keyframe(xPos, yPos, this.svg, this.width, this.height, this);
                 let newMotionPath = new MotionPath(motionPath, newKeyframe, this);
                 motionPath.nextMotinPath = newMotionPath;
-                
+
                 motionPath = newMotionPath;
                 nextMotionPath = motionPath.nextMotinPath;
             }
         }
-        
+
         // Update all paths
         this.updatePaths();
     }
@@ -429,25 +427,25 @@ class Timeline {
     // Utility functions for coordinate conversion
     svgToTimelineUnits(x, y) {
         // Convert SVG coordinates to timeline units (0-100 for position, 0-180 for value)
-        const position = ((x - Timeline.SVG_PADDING_LEFT) / (this.width - (Timeline.SVG_PADDING_LEFT + Timeline.SVG_PADDING_RIGHT))) * Timeline.TIMELINE_POSITION_MAX;
-        const value = Timeline.TIMELINE_VALUE_MAX - ((y - Timeline.SVG_PADDING_BOTTOM) / (this.height - (Timeline.SVG_PADDING_TOP + Timeline.SVG_PADDING_BOTTOM))) * Timeline.TIMELINE_VALUE_MAX;
+        const position = ((x - SVG_PADDING_LEFT) / (this.width - (SVG_PADDING_LEFT + SVG_PADDING_RIGHT))) * TIMELINE_POSITION_MAX;
+        const value = TIMELINE_VALUE_MAX - ((y - SVG_PADDING_BOTTOM) / (this.height - (SVG_PADDING_TOP + SVG_PADDING_BOTTOM))) * TIMELINE_VALUE_MAX;
         return { position, value };
     }
 
     timelineToSvgUnits(position, value) {
         // Convert timeline units (0-100 for position, 0-180 for value) to SVG coordinates
-        const x = (position / Timeline.TIMELINE_POSITION_MAX) * (this.width - (Timeline.SVG_PADDING_LEFT + Timeline.SVG_PADDING_RIGHT)) + Timeline.SVG_PADDING_LEFT;
-        const y = this.height - Timeline.SVG_PADDING_BOTTOM - ((value / Timeline.TIMELINE_VALUE_MAX) * (this.height - (Timeline.SVG_PADDING_TOP + Timeline.SVG_PADDING_BOTTOM)));
+        const x = (position / TIMELINE_POSITION_MAX) * (this.width - (SVG_PADDING_LEFT + SVG_PADDING_RIGHT)) + SVG_PADDING_LEFT;
+        const y = this.height - SVG_PADDING_BOTTOM - ((value / TIMELINE_VALUE_MAX) * (this.height - (SVG_PADDING_TOP + SVG_PADDING_BOTTOM)));
         return { x, y };
     }
 
     getKeyframeData() {
         const keyframes = [];
         let motionPath = this.motionPaths;
-        console.log("getKeyframeData");
+        // console.log("getKeyframeData");
         do {
             // Skip the baseframe
-            if (!(motionPath.endKeyframe instanceof Baseframe)) {                
+            if (!(motionPath.endKeyframe instanceof Baseframe)) {
                 const { position, value } = this.svgToTimelineUnits(motionPath.endKeyframe.x, motionPath.endKeyframe.y);
                 keyframes.push({ position, value });
             }
@@ -473,10 +471,10 @@ class Timeline {
 
             // Create new keyframe
             const newKeyframe = new Keyframe(xPos, yPos, this.svg, this.width, this.height, this);
-            
+
             // Create new motion path
             const newMotionPath = new MotionPath(currentMotionPath, newKeyframe, this);
-            
+
             // Set control points if they exist
             if (mp.controlPoints) {
                 newMotionPath.controlPoints = {
@@ -509,5 +507,124 @@ class Timeline {
         if (axisGroup) {
             this.drawXAxisLabels(axisGroup);
         }
+    }
+
+    createTimeIndicator() {
+        // Create the time indicator line
+        this.timeIndicator = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        this.timeIndicator.setAttribute("x1", SVG_PADDING_LEFT);
+        this.timeIndicator.setAttribute("y1", SVG_PADDING_TOP);
+        this.timeIndicator.setAttribute("x2", SVG_PADDING_LEFT);
+        this.timeIndicator.setAttribute("y2", this.height - SVG_PADDING_BOTTOM);
+        this.timeIndicator.setAttribute("stroke", "red");
+        this.timeIndicator.setAttribute("stroke-width", "2");
+        this.timeIndicator.setAttribute("stroke-dasharray", "5,5");
+        this.timeIndicator.style.zIndex = "-1"; // Set z-index to ensure it's on the bottom layer
+        
+        // Insert at the beginning of SVG to ensure it stays behind other elements
+        this.svg.insertBefore(this.timeIndicator, this.svg.firstChild);
+    }
+
+    updateTimeIndicator(position) {
+        // Convert position (0-100) to SVG x-coordinate
+        const x = SVG_PADDING_LEFT + (position / 100) * (this.width - SVG_PADDING_LEFT - SVG_PADDING_RIGHT);
+
+        // Update the time indicator position
+        this.timeIndicator.setAttribute("x1", x);
+        this.timeIndicator.setAttribute("x2", x);
+    }
+
+    calculateYValueAtPosition(position) {
+        // Find the motion path that contains this position
+        let currentMotionPath = this.motionPaths;
+        let yValue = 0;        
+                
+        do {
+            const x1 = currentMotionPath.startKeyframe.getStartX();
+            const x2 = currentMotionPath.endKeyframe.getEndX();
+          //  console.log("id: " + this.id + " x1: " + x1 + " x2: " + x2 + " position: " + position );            
+            if (x1 <= position && x2 >= position) {
+                // Calculate t (0-1) based on position                    
+                // Use the getPositionAtTime method to calculate the position
+                yValue = currentMotionPath.getPositionAtTime(position);
+           //     console.log("getPositionAtTime: " + yValue);
+                break;
+            }
+            
+            currentMotionPath = currentMotionPath.nextMotinPath;
+        } while (currentMotionPath !== this.motionPaths);
+        
+        return yValue;
+    }
+
+    update(currentTime) {
+        // Get the ServoManager instance from the window object
+        const servoManager = window.servoManager;
+        
+        // Find the servo object to check if it's enabled
+        const servo = servoManager ? servoManager.servos.find(s => s.id === this.id) : null;
+        
+        // Update the value in the status table
+        const statusTable = document.querySelector('.status-section table tbody');
+        if (statusTable) {
+            const statusRow = statusTable.querySelector(`tr:nth-child(${this.id})`);
+            if (statusRow) {
+                const valueCell = statusRow.querySelector('td:nth-child(7)'); // 7th column is the value column
+                if (valueCell) {
+                    // If servo is disabled, show "Disabled" instead of value
+                    if (!servo || !servo.enabled) {
+                        valueCell.textContent = "Disabled";
+                        return;
+                    }
+                }
+            }
+        }
+        
+        // If servo is disabled, don't update anything else
+        if (!servo || !servo.enabled) {
+            return;
+        }
+        
+        // Convert current time to position (0-100)
+        const position = (currentTime / this.duration) * 100;
+        
+        // Calculate y value at current position
+        const yValue = this.calculateYValueAtPosition(position);
+
+        // Update the value in the status table            
+        if (statusTable) {
+            const statusRow = statusTable.querySelector(`tr:nth-child(${this.id})`);
+            if (statusRow) {
+                const valueCell = statusRow.querySelector('td:nth-child(7)'); // 7th column is the value column
+                if (valueCell) {
+                    valueCell.textContent = Math.round(yValue);
+                }
+            }
+        }
+
+        // Update the time indicator position
+        this.updateTimeIndicator(position);
+        
+        // Send data to serial port if connected
+        if (servoManager && servoManager.isConnected && servoManager.webserial) {
+            // Format: "servo nr,yValue"
+            const serialData = `${this.id},${Math.round(yValue)}\n`;
+            console.log("Sending serial data: " + serialData);
+            servoManager.webserial.sendSerial(serialData);
+        }
+    }
+
+    precalculateAnimationValues() {
+        const values = [];
+        const steps = 100; // Number of steps to calculate
+        const stepSize = 100 / steps; // Size of each step in percentage
+
+        for (let i = 0; i <= steps; i++) {
+            const position = i * stepSize;
+            const yValue = this.calculateYValueAtPosition(position);
+            values.push(Math.round(yValue));
+        }
+
+        return values;
     }
 }

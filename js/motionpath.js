@@ -273,4 +273,44 @@ class MotionPath {
         }
         return false;
     }
+
+    getPositionAtTime(time) {
+        // Ensure time is between 0 and 100
+        const clampedTime = Math.max(0, Math.min(100, time));
+        
+        // Get the start and end positions in the 1-100 range
+        const startX = this.startKeyframe.getStartX();
+        const endX = this.endKeyframe.getEndX();
+        
+        // Convert time from 0-100 range to 0-1 range for this specific path
+        const t = (clampedTime - startX) / (endX - startX);
+        
+        // Ensure t is between 0 and 1
+        const clampedT = Math.max(0, Math.min(1, t));
+        
+        // Get the y-values directly from the keyframes
+        const y1 = this.startKeyframe.y;
+        const y2 = this.endKeyframe.y;
+        
+        // Calculate control points for the Bezier curve
+        // For a simple Bezier curve, we'll use points 1/3 and 2/3 of the way between y1 and y2
+        const control1Y = y1 + (y2 - y1) / 3;
+        const control2Y = y1 + 2 * (y2 - y1) / 3;
+        
+        // Calculate the y-value at the given time using Bezier curve formula
+        const oneMinusT = 1 - clampedT;
+        const oneMinusT2 = oneMinusT * oneMinusT;
+        const oneMinusT3 = oneMinusT2 * oneMinusT;
+        const t2 = clampedT * clampedT;
+        const t3 = t2 * clampedT;
+        
+       let result = oneMinusT3 * y1 + 
+               3 * oneMinusT2 * clampedT * control1Y + 
+               3 * oneMinusT * t2 * control2Y + 
+               t3 * y2;
+        
+        result = (result - 30) * 180 / (this.timelineHeight-60);               
+
+        return 180 - result;
+    }
 }

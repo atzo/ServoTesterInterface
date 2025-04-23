@@ -30,8 +30,7 @@ The interface is functional but may undergo significant changes as development c
 
 ### Missing Components
 The following interface components are currently under development:
-- USB and Bluetooth connection implementation
-- Timeline scrubber for animation preview and control
+- Bluetooth connection implementation
 
 ## Hardware Integration
 
@@ -48,6 +47,7 @@ This project is part of a larger system that includes a microcontroller-based ha
 - Project save/load functionality with auto-save
 - USB and Bluetooth connectivity options
 - Browser-based - no installation required
+- Timeline scrubber for animation preview and control
 
 ## Technologies
 - Pure JavaScript for core functionality
@@ -64,6 +64,7 @@ This project is part of a larger system that includes a microcontroller-based ha
 - Visual Bezier curve editing for smooth motion paths
 - Real-time servo position preview
 - USB and Bluetooth connectivity options
+- Timeline scrubber for animation playback and testing
 
 ### 🎨 Timeline Controls
 - Drag-and-drop keyframe positioning
@@ -71,6 +72,8 @@ This project is part of a larger system that includes a microcontroller-based ha
 - Visual feedback for motion paths
 - Base frame adjustment for initial positions
 - Arrow key support for fine-tuning
+- Play/pause controls for animation testing
+- Time slider for manual position control
 
 ### 💾 Project Management
 - Save/Load projects as JSON files
@@ -91,6 +94,7 @@ This project is part of a larger system that includes a microcontroller-based ha
 - Real-time updates
 - Event-driven architecture
 - Modular code structure
+- Precalculated animation values for smooth playback
 
 ## Setup
 
@@ -104,6 +108,38 @@ git clone https://github.com/yourusername/ServoTesterInterface.git
    - Web Bluetooth API (for Bluetooth connections)
    - Modern JavaScript features
    - SVG manipulation
+
+### Local Development Server
+
+⚠️ **Important**: When running the project locally, you must use a local web server due to Web Serial API security requirements. Opening the HTML file directly (`file://` protocol) will not allow Web Serial connections.
+
+You can use any of these methods to start a local server:
+
+#### Using Node.js
+```bash
+# Install a simple HTTP server
+npm install -g http-server
+
+# Start the server in the project directory
+http-server
+```
+
+#### Using Python
+```bash
+# Python 3
+python -m http.server
+
+# Python 2
+python -m SimpleHTTPServer
+```
+
+#### Using Apache
+If you have Apache installed, you can configure it to serve the project directory.
+
+#### Using Visual Studio Code
+If you're using VS Code, you can install the "Live Server" extension and click "Go Live" to start a local server.
+
+After starting a local server, access the application at `http://localhost:8000` (or the port specified by your server).
 
 ## Project Structure
 

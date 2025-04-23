@@ -1,7 +1,9 @@
 class ServoManager {
     constructor() {
-        this.servos = [];
-        this.nextId = 1;
+        this.servos = [];        
+        this.timelines = [];
+        this.webserial = null;
+        this.isConnected = false;
         this.tableBody = document.querySelector('.status-section tbody');
         
         // Wait for DOM to be fully loaded before initializing
@@ -113,6 +115,18 @@ class ServoManager {
             }
         });
 
+        // Handle enable switch changes
+        document.addEventListener('change', (e) => {
+            if (e.target.matches('.enable-switch input[type="checkbox"]')) {
+                const servoId = parseInt(e.target.dataset.enableId);
+                const servo = this.servos.find(s => s.id === servoId);
+                if (servo) {
+                    servo.enabled = e.target.checked;
+                    this.saveToStorage();
+                }
+            }
+        });
+
         // Auto-save on any change
         this.setupAutoSave();
 
@@ -126,8 +140,20 @@ class ServoManager {
                         servo.timeline.setDuration(newDuration);
                     }
                 });
+                
+                // Also update the TimelineScrubber's duration
+                if (this.timelineScrubber) {
+                    this.timelineScrubber.setDuration(newDuration);
+                }
+                this.saveToStorage();
             }
         });
+
+        // USB Connection button
+        const usbConnectBtn = document.getElementById('usbConnect');
+        if (usbConnectBtn) {
+            usbConnectBtn.addEventListener('click', this.handleUsbConnection.bind(this));
+        }
     }
 
     setupAutoSave() {
@@ -209,6 +235,7 @@ class ServoManager {
                     name: servo.name,
                     showInControl: servo.showInControl,
                     type: servo.type,
+                    enabled: servo.enabled || false,
                     loop: servo.loop || false,
                     position: servo.position,
                     limitMin: servo.limitMin,
@@ -218,15 +245,14 @@ class ServoManager {
                     keyframes,
                     motionPaths
                 };
-            }),
-            nextId: this.nextId,
+            }),            
             duration: duration
         };
     }
 
     saveToStorage() {
         const data = this.collectData();
-        console.log('Saving data to storage:', data);
+      //  console.log('Saving data to storage:', data);
         localStorage.setItem('servoConfig', JSON.stringify(data));
     }
 
@@ -247,6 +273,7 @@ class ServoManager {
                 name: servoData.name,
                 showInControl: servoData.showInControl,
                 type: servoData.type,
+                enabled: servoData.enabled || false,
                 loop: servoData.loop || false,
                 position: servoData.position,
                 limitMin: servoData.limitMin,
@@ -279,7 +306,7 @@ class ServoManager {
                 if (servoData.keyframes && servoData.motionPaths) {
                     // First add all keyframes using addKeyframe
                     servoData.keyframes.forEach(keyframeData => {
-                        console.log("Adding keyframe: " + keyframeData.position + " " + keyframeData.value);                        
+                       // console.log("Adding keyframe: " + keyframeData.position + " " + keyframeData.value);                        
                         timeline.addKeyframe(keyframeData.position, keyframeData.value);
                     });
                     
@@ -302,10 +329,7 @@ class ServoManager {
                 }
             }
         });
-        
-        // Update nextId
-        this.nextId = data.nextId || this.servos.length + 1;
-        
+                                
         // Set the servo count input to the number of servos
         const servoCountInput = document.getElementById('servoCount');
         if (servoCountInput) {
@@ -317,22 +341,22 @@ class ServoManager {
         const savedData = localStorage.getItem('servoConfig');
         if (savedData) {
             try {
-                console.log('Loading saved data:', savedData);
+              //  console.log('Loading saved data:', savedData);
                 const data = JSON.parse(savedData);
                 this.loadData(data);
             } catch (e) {
-                console.error('Error loading saved configuration:', e);
+                //console.error('Error loading saved configuration:', e);
                 this.initializeServos(3); // Fallback to default
             }
         } else {
-            console.log('No saved data found, initializing with defaults');
+            //console.log('No saved data found, initializing with defaults');
             this.initializeServos(3); // No saved data, start with default
         }
     }
 
     saveToFile(e) {
         const data = this.collectData();
-        console.log('Saving data:', data);
+        //console.log('Saving data:', data);
         const jsonString = JSON.stringify(data, null, 2);
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -361,7 +385,7 @@ class ServoManager {
         };
 
         reader.onerror = (e) => {
-            console.error('Error reading file:', e);
+           // console.error('Error reading file:', e);
             alert('Error reading file. Please try again.');
         };
 
@@ -370,7 +394,7 @@ class ServoManager {
 
     setServoCount(count) {
         if (count < 1 || count > 16) return;
-        console.log("Setting servo count to: " + count);
+       // console.log("Setting servo count to: " + count);
         const currentCount = this.servos.length;
         const controlSection = document.getElementById('control-section');
         
@@ -397,29 +421,28 @@ class ServoManager {
     }
 
     addServo() {
-        const servo = {
-            id: this.nextId++,
+        const newServo = {
+            id: this.servos.length + 1,
             name: `Servo ${this.servos.length + 1}`,
             showInControl: true,
-            type: true,
+            type: '180',
+            enabled: true,
             loop: false,
             position: 90,
             limitMin: 0,
             limitMax: 180,
             visual: '🔄'
         };
-        this.servos.push(servo);
+        this.servos.push(newServo);
     }
 
     removeServo() {
         if (this.servos.length <= 1) return; // Don't remove the last servo
 
         // Get the ID of the servo being removed
-        const removedServoId = this.servos[this.servos.length - 1].id;
-        
+        const removedServoId = this.servos[this.servos.length - 1].id;        
         // Remove the servo from the array
-        this.servos.pop();
-        
+        this.servos.pop();        
         // Remove its timeline from the DOM
         const timelineContainer = document.querySelector(`.timeline-container[data-id="${removedServoId}"]`);
         if (timelineContainer) {
@@ -535,6 +558,17 @@ class ServoManager {
                 this.initializeTimeline(servo, controlSection);
             }
         });
+        
+        // Create the TimelineScrubber after initializing all timelines        
+        // Only create a new TimelineScrubber if one doesn't already exist
+        if (!this.timelineScrubber) {
+            this.timelineScrubber = new TimelineScrubber(parseInt(document.getElementById('timelineDuration').value) || 5, this.servos);
+            // Make it globally accessible
+            window.timelineScrubber = this.timelineScrubber;
+        } else {
+            // If a TimelineScrubber already exists, just update its servos
+            this.timelineScrubber.updateServos(this.servos);
+        }
     }   
 
     initializeTimeline(servo, controlSection) {
@@ -548,10 +582,20 @@ class ServoManager {
         servoInfo.innerHTML = `
             <p>Servo ${servo.id}</p>
             <input type="text" value="${servo.name}" data-id="${servo.id}">
+            <div class="enable-container">
+                <label class="enable-switch">
+                    <input type="checkbox" ${servo.enabled ? 'checked' : ''} data-enable-id="${servo.id}">
+                    <span class="slider">
+                        <span class="option left">Off</span>
+                        <span class="option right">On</span>
+                    </span>
+                </label>
+            </div>
             <div class="loop-control">
                 <input type="checkbox" ${servo.loop ? 'checked' : ''} data-id="${servo.id}">
                 <span>Loop</span>
             </div>
+            
         `;
         servoContainer.appendChild(servoInfo);
         
@@ -579,7 +623,7 @@ class ServoManager {
         
         // Add event listener for timeline changes
         timeline.addEventListener('change', () => {
-            console.log('Timeline changed, saving to storage');
+          //  console.log('Timeline changed, saving to storage');
             this.saveToStorage();
         });
         
@@ -617,15 +661,13 @@ class ServoManager {
         
         // Save the new state
         this.saveToStorage();
+        this.timelineScrubber = new TimelineScrubber(parseInt(document.getElementById('timelineDuration').value) || 5, this.servos);
     }
 
     clearAll() {
         // Clear all servos
         this.servos = [];
-        
-        // Reset the nextId counter to 1
-        this.nextId = 1;   
-        
+                                
         // Clear the control section
         const controlSection = document.getElementById('control-section');
         if (controlSection) {
@@ -646,6 +688,79 @@ class ServoManager {
         if (servoCountInput) {
             servoCountInput.value = '1';
         }
+    }
+
+    async handleUsbConnection() {
+        try {
+            if (!this.isConnected) {
+                // Initialize WebSerial if not already done
+                if (!this.webserial) {
+                   // console.log("Initializing WebSerial");
+                    this.webserial = new WebSerialPort();
+                    // Attach the data event listener
+                    this.webserial.on("data", this.handleSerialData.bind(this));                    
+                }
+                
+                // Open the port
+                //console.log("Opening port");
+                await this.webserial.openPort(); //auto open is true so we don't need to call this    
+                this.isConnected = true;
+                
+                // Update button text
+               // console.log("Updating button text");
+                const usbConnectBtn = document.getElementById('usbConnect');
+                if (usbConnectBtn) {
+                    // Keep the icon and update only the text
+                    const icon = usbConnectBtn.querySelector('.icon');
+                    usbConnectBtn.innerHTML = '';
+                    usbConnectBtn.appendChild(icon);
+                    usbConnectBtn.appendChild(document.createTextNode(' Disconnect USB'));
+                }
+                               
+            } else {
+                // Close the port
+              //  console.log("Closing port");
+                await this.webserial.closePort();
+                this.isConnected = false;
+                
+                // Update button text
+                const usbConnectBtn = document.getElementById('usbConnect');
+                if (usbConnectBtn) {
+                    // Keep the icon and update only the text
+                    const icon = usbConnectBtn.querySelector('.icon');
+                    usbConnectBtn.innerHTML = '';
+                    usbConnectBtn.appendChild(icon);
+                    usbConnectBtn.appendChild(document.createTextNode(' USB Connection'));
+                }
+                
+                //console.log("USB connection closed");
+            }
+        } catch (error) {
+            console.error("Error handling USB connection:", error);
+            this.isConnected = false;
+        }
+    }
+    
+    handleSerialData(event) {
+        // Handle incoming serial data
+        const data = event.detail.data;
+        
+        // Log the raw data
+       // console.log("Received serial data:", data);
+        
+        // Log the data as a hex string for debugging binary data
+       // const hexString = Array.from(new TextEncoder().encode(data))
+       //     .map(b => b.toString(16).padStart(2, '0'))
+       //     .join(' ');
+        //console.log("Data as hex:", hexString);
+        
+        // Log the data as ASCII codes
+        //const asciiCodes = Array.from(new TextEncoder().encode(data))
+        //    .join(',');
+        //console.log("Data as ASCII codes:", asciiCodes);
+        
+        // Process the data as needed
+        // This is where you would parse the incoming data and update servos
     }
 }
 
