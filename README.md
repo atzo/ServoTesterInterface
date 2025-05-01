@@ -48,6 +48,9 @@ This project is part of a larger system that includes a microcontroller-based ha
 - USB and Bluetooth connectivity options
 - Browser-based - no installation required
 - Timeline scrubber for animation preview and control
+- Output type selection (PWM or PCA9685)
+  - PWM: Direct PWM output from the Arduino board
+  - PCA9685: External board connected via I2C for expanded servo control
 
 ## Technologies
 - Pure JavaScript for core functionality
